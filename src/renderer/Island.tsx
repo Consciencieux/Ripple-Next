@@ -8,6 +8,7 @@ import { useIslandGeometry } from './hooks/useIslandGeometry';
 import { QuickView } from './components/QuickView';
 import { Activity, useCallback, useEffect, useState } from 'react';
 import { recordIslandContext } from './lib/diagnostics';
+import { hoverMode, hoverScale } from './lib/modes';
 export default function Island() {
   const controller = useIslandController();
   const [assistantAnswerHeight, setAssistantAnswerHeight] = useState(0);
@@ -19,9 +20,8 @@ export default function Island() {
     islandElementRef,
     setIsHovered,
     mode,
-    showInfoWhenIdleEnabled,
-    isPlaying,
     setMode,
+    standbyBorderEnabled,
     clearClickSuppression,
     consumeClickSuppression,
     isInteractiveTarget,
@@ -110,11 +110,8 @@ export default function Island() {
       onMouseEnter={(event) => {
         trackPointerPosition(event);
         setIsHovered(true);
-        if (mode === 'still' && showInfoWhenIdleEnabled && !isPlaying) {
-          setMode('large');
-        } else if (mode !== 'large') {
-          setMode('quick');
-        }
+        const nextMode = hoverMode(mode);
+        if (nextMode !== mode) setMode(nextMode);
       }}
       onMouseLeave={(event) => {
         trackPointerPosition(event);
@@ -161,7 +158,7 @@ export default function Island() {
         bottom: sideStyles.bottom ?? 'auto',
         backgroundColor: hideNotActiveIslandEnabled && mode === 'still' ? 'rgba(0,0,0,0)' : bgColor,
         color: hideNotActiveIslandEnabled && mode === 'still' ? 'rgba(0,0,0,0)' : textColor,
-        scale: isHovered && mode === 'large' ? 1.05 : 1,
+        scale: hoverScale(isHovered, mode, standbyBorderEnabled),
         x: sideStyles.x,
       }}
       onUpdate={syncWindowInputRegion}

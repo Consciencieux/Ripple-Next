@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { islandPages } from '../../../src/renderer/lib/tabs';
 import { defaultPageLayoutContext } from '../../../src/renderer/lib/tabGeometry';
 import { nextTabId } from '../../../src/renderer/lib/navigation';
-import { modeReducer, resolveMode } from '../../../src/renderer/lib/modes';
+import { hoverMode, hoverScale, modeReducer, resolveMode } from '../../../src/renderer/lib/modes';
 
 describe('Island navigation and modes', () => {
   it('keeps registered identities, configured order, hidden pages and media availability', () => {
@@ -25,5 +25,14 @@ describe('Island navigation and modes', () => {
     expect(resolveMode('still', false, true)).toBe('large');
     expect(resolveMode('large', true, false)).toBe('large');
     expect(modeReducer('quick', (mode) => (mode === 'large' ? 'quick' : 'large'))).toBe('large');
+  });
+  it('opens quick view on hover and keeps standby magnification', () => {
+    expect(hoverMode('still')).toBe('quick');
+    expect(hoverMode('quick')).toBe('quick');
+    expect(hoverMode('large')).toBe('large');
+    expect(hoverScale(true, 'quick', false)).toBe(1);
+    expect(hoverScale(true, 'large', false)).toBe(1.05);
+    expect(hoverScale(true, 'quick', true)).toBe(1.05);
+    expect(hoverScale(false, 'quick', true)).toBe(1);
   });
 });
